@@ -187,6 +187,7 @@ Dokumen ini merangkum analisis lengkap mengenai kekurangan, celah keamanan, bug 
 - [x] **7. Pembersihan Duplikasi Middleware:** Selesai (`bootstrap/app.php`).
 - [x] **8. Feature Tests REST API:** Selesai (`DestinationApiTest.php`, 7 test skenario lulus).
 - [x] **9. Feature Tests Admin Validation:** Selesai (`BusinessValidationTest.php`, 6 test skenario lulus).
-- [ ] **10. Integrasi Data Dinamis ke Halaman React:** Selanjutnya.
-- [ ] **11. CRUD Destinasi Admin & File Upload Storage:** Lanjutan operasional.
+- [x] **10. Integrasi Data Dinamis ke Halaman React:** Selesai (Rute `/` dan `/destinations` kini menyuplai data dinamis destinasi, kategori, dan statistik database ke `Index.jsx` & `Destinations/Index.jsx`).
+- [x] **11. Notifikasi Email Validasi Mitra Usaha:** Selesai (`PartnerValidationNotification.php` otomatis mengirim email saat mitra disetujui atau ditolak dengan alasan penolakan).
+- [ ] **12. CRUD Destinasi Admin & File Upload Storage:** Lanjutan operasional.
 
