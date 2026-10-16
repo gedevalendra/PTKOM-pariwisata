@@ -15,10 +15,45 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Akun Pengguna Biasa (Wisatawan)
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Wisatawan Test',
+                'role' => 'user',
+                'validation_status' => 'approved',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // Akun Administrator
+        User::firstOrCreate(
+            ['email' => 'admin@pariwisatalampung.go.id'],
+            [
+                'name' => 'Administrator Pariwisata',
+                'role' => 'admin',
+                'validation_status' => 'approved',
+                'password' => bcrypt('admin123'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // Akun Mitra Usaha (Contoh Menunggu Validasi)
+        User::firstOrCreate(
+            ['email' => 'mitra@pariwisatalampung.go.id'],
+            [
+                'name' => 'Budi Santoso',
+                'role' => 'business_owner',
+                'business_name' => 'Pindang Meranjat Asli Lampung',
+                'business_type' => 'kuliner',
+                'business_address' => 'Jl. Wolter Monginsidi No. 45, Bandar Lampung',
+                'phone_number' => '+62 812-9876-5432',
+                'validation_status' => 'pending',
+                'password' => bcrypt('mitra123'),
+                'email_verified_at' => now(),
+            ]
+        );
         
         $this->call([
             DestinationSeeder::class,
