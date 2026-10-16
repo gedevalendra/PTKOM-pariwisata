@@ -54,6 +54,10 @@ class BusinessValidationController extends Controller
             'rejection_reason' => $request->status === 'rejected' ? $request->rejection_reason : null,
         ]);
 
+        if (in_array($request->status, ['approved', 'rejected'])) {
+            $user->notify(new \App\Notifications\PartnerValidationNotification($request->status, $request->rejection_reason));
+        }
+
         return back()->with('success', 'Status validasi pemilik usaha berhasil diperbarui.');
     }
 }

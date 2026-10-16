@@ -40,6 +40,8 @@ test('admin can view business validation page', function () {
 });
 
 test('admin can approve business owner validation', function () {
+    \Illuminate\Support\Facades\Notification::fake();
+
     $admin = User::factory()->create([
         'role' => 'admin',
     ]);
@@ -56,9 +58,12 @@ test('admin can approve business owner validation', function () {
 
     $response->assertSessionHas('success');
     expect($partner->fresh()->validation_status)->toBe('approved');
+    \Illuminate\Support\Facades\Notification::assertSentTo($partner, \App\Notifications\PartnerValidationNotification::class);
 });
 
 test('admin can reject business owner validation with reason', function () {
+    \Illuminate\Support\Facades\Notification::fake();
+
     $admin = User::factory()->create([
         'role' => 'admin',
     ]);
@@ -77,4 +82,5 @@ test('admin can reject business owner validation with reason', function () {
     $response->assertSessionHas('success');
     expect($partner->fresh()->validation_status)->toBe('rejected');
     expect($partner->fresh()->rejection_reason)->toBe('Dokumen izin usaha belum lengkap.');
+    \Illuminate\Support\Facades\Notification::assertSentTo($partner, \App\Notifications\PartnerValidationNotification::class);
 });
