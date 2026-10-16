@@ -83,10 +83,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Business Owner Validation for Admin
+    // Admin Protected Routes
     Route::middleware('admin')->group(function () {
         Route::get('/admin/validasi-mitra', [BusinessValidationController::class, 'index'])->name('admin.business-validation.index');
         Route::patch('/admin/validasi-mitra/{user}', [BusinessValidationController::class, 'updateStatus'])->name('admin.business-validation.update');
+
+        Route::get('/admin/destinasi', [\App\Http\Controllers\Admin\DestinationManagementController::class, 'index'])->name('admin.destinations.index');
+        Route::post('/admin/destinasi', [\App\Http\Controllers\Admin\DestinationManagementController::class, 'store'])->name('admin.destinations.store');
+        Route::put('/admin/destinasi/{destination}', [\App\Http\Controllers\Admin\DestinationManagementController::class, 'update'])->name('admin.destinations.update');
+        Route::delete('/admin/destinasi/{destination}', [\App\Http\Controllers\Admin\DestinationManagementController::class, 'destroy'])->name('admin.destinations.destroy');
     });
 });
 
