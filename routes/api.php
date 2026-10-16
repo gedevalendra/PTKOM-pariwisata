@@ -2,12 +2,14 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DestinationController;
 use App\Http\Controllers\Api\SiteMetricController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/destinations', [DestinationController::class, 'index']);
     Route::get('/destinations/{slug}', [DestinationController::class, 'show']);
+    Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/hero-stats', [SiteMetricController::class, 'heroStats']);
     
     // Contact Info endpoint
