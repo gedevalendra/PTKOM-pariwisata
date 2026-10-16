@@ -20,10 +20,11 @@ class DestinationController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%")
-                  ->orWhere('location', 'ilike', "%{$search}%");
+            $operator = config('database.default') === 'pgsql' ? 'ilike' : 'like';
+            $query->where(function ($q) use ($search, $operator) {
+                $q->where('name', $operator, "%{$search}%")
+                  ->orWhere('description', $operator, "%{$search}%")
+                  ->orWhere('location', $operator, "%{$search}%");
             });
         }
 
@@ -35,9 +36,12 @@ class DestinationController extends Controller
         ]);
     }
 
-    public function show($slug)
+    public function show($identifier)
     {
-        $destination = Destination::with(['category', 'images'])->where('slug', $slug)->firstOrFail();
+        $destination = Destination::with(['category', 'images'])
+            ->where('slug', $identifier)
+            ->orWhere('id', $identifier)
+            ->firstOrFail();
         
         return (new DestinationResource($destination))->additional([
             'status' => 'success',
