@@ -145,13 +145,21 @@ const testimonialsData = [
     },
 ];
 
-export default function Index() {
+export default function Index({
+    destinations: initialDestinations = [],
+    categories: initialCategories = [],
+    statistics: initialStatistics = [],
+}) {
+    const destinationsList = initialDestinations && initialDestinations.length > 0 ? initialDestinations : destinationsData;
+    const categoriesList = initialCategories && initialCategories.length > 0 ? ['Semua', ...initialCategories] : categories;
+    const statsList = initialStatistics && initialStatistics.length > 0 ? initialStatistics : statistics;
+
     const [activeCategory, setActiveCategory] = useState('Semua');
 
     const filteredDestinations =
         activeCategory === 'Semua'
-            ? destinationsData
-            : destinationsData.filter((d) => d.category === activeCategory);
+            ? destinationsList
+            : destinationsList.filter((d) => d.category === activeCategory);
 
     return (
         <>
@@ -227,7 +235,7 @@ export default function Index() {
                     {/* Stats Section */}
                     <section className="bg-[#4C83AD] text-white shadow-inner">
                         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-y-8 px-6 py-8 sm:px-8 md:grid-cols-4 lg:px-12">
-                            {statistics.map((statistic) => (
+                            {statsList.map((statistic) => (
                                 <div
                                     key={statistic.label}
                                     className="text-center"
@@ -264,7 +272,7 @@ export default function Index() {
 
                             {/* Filter Tabs */}
                             <div className="mt-10 flex flex-wrap justify-center gap-2 sm:gap-3">
-                                {categories.map((category) => (
+                                {categoriesList.map((category) => (
                                     <button
                                         key={category}
                                         onClick={() => setActiveCategory(category)}

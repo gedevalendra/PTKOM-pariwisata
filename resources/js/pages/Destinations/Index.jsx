@@ -289,12 +289,27 @@ const readQueryParam = (key, fallback) => {
     return new URLSearchParams(window.location.search).get(key) ?? fallback;
 };
 
-export default function Index() {
+export default function Index({
+    destinations: serverDestinations = [],
+    categories: serverCategories = [],
+}) {
+    const allDestinations = useMemo(() => {
+        return serverDestinations && serverDestinations.length > 0
+            ? serverDestinations
+            : destinationsData;
+    }, [serverDestinations]);
+
+    const allCategories = useMemo(() => {
+        return serverCategories && serverCategories.length > 0
+            ? ['Semua', ...serverCategories]
+            : categories;
+    }, [serverCategories]);
+
     const [searchQuery, setSearchQuery] = useState(() => readQueryParam('search', ''));
     const [activeCategory, setActiveCategory] = useState(() => {
         const category = readQueryParam('category', 'Semua');
 
-        return categories.includes(category) ? category : 'Semua';
+        return allCategories.includes(category) ? category : 'Semua';
     });
     const [activeRegency, setActiveRegency] = useState(() => readQueryParam('regency', ''));
     const [sortBy, setSortBy] = useState(() => {
@@ -328,7 +343,14 @@ export default function Index() {
     const openDetail = (destination) =>
         setSelectedDestination({
             ...destination,
-            ...destinationDetails[destination.slug],
+            ...(destinationDetails[destination.slug] ?? {
+                tagline: destination.name,
+                openingHours: '08.00 – 17.00 WIB',
+                address: destination.regency,
+                description: destination.description ?? destination.name,
+                facilities: ['Pemandu', 'Toilet', 'Parkir'],
+                tips: ['Patuhi aturan setempat dan jaga kebersihan.'],
+            }),
         });
 
     const resetFilters = () => {
@@ -337,12 +359,12 @@ export default function Index() {
         setActiveRegency('');
     };
 
-    const regencies = useMemo(() => [...new Set(destinationsData.map((d) => d.regency))].sort(), []);
+    const regencies = useMemo(() => [...new Set(allDestinations.map((d) => d.regency))].sort(), [allDestinations]);
 
     const filteredDestinations = useMemo(() => {
         const keyword = searchQuery.trim().toLowerCase();
 
-        const results = destinationsData.filter(
+        const results = allDestinations.filter(
             (destination) =>
                 (activeCategory === 'Semua' || destination.category === activeCategory) &&
                 (!activeRegency || destination.regency === activeRegency) &&
@@ -357,7 +379,7 @@ export default function Index() {
         };
 
         return results.sort(comparators[sortBy]);
-    }, [searchQuery, activeCategory, activeRegency, sortBy]);
+    }, [allDestinations, searchQuery, activeCategory, activeRegency, sortBy]);
 
     const pillClassName = 'rounded-full font-mono text-[11px] uppercase tracking-wider transition';
 
@@ -409,7 +431,7 @@ export default function Index() {
                             </label>
 
                             <div className="-mx-6 mt-5 flex gap-2 overflow-x-auto px-6 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
-                                {categories.map((category) => (
+                                {allCategories.map((category) => (
                                     <button
                                         key={category}
                                         type="button"
