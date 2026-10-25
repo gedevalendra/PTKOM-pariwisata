@@ -27,7 +27,7 @@ export default function PublicNavbar() {
 
     return (
         <nav className="fixed inset-x-0 flex justify-center items-center w-full px-[2%] top-4 z-50">
-            <div className="relative w-full z-50 border border-slate-200/80 bg-white/90 backdrop-blur-md shadow-lg rounded-2xl transition-all">
+            <div className="relative w-full z-50 border border-slate-200/80 bg-white shadow-lg rounded-2xl transition-all">
                 <div className="mx-auto flex w-full items-center justify-between px-6 py-3.5 sm:px-8">
                     <div className="flex items-center gap-2">
                         <Link href="/" className="flex items-center gap-2.5 group">
