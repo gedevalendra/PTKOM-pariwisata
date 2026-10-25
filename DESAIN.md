@@ -1,4 +1,4 @@
-# Panduan Desain: Jelajah Lampung
+# Panduan Desain: WonderLy
 
 Dokumen ini adalah acuan gaya visual untuk semua halaman Jelajah Lampung (landing page, halaman auth, dan halaman baru). Baca seluruhnya sebelum membuat atau mengubah UI. Referensi utama: `Index.jsx` (landing page), `Register.jsx`, `Login.jsx`, `RegisterSelect.jsx`.
 
