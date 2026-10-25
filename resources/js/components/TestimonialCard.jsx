@@ -7,15 +7,15 @@ export default function TestimonialCard({
     location,
 }) {
     return (
-        <div className="flex h-full flex-col justify-between rounded-2xl bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-8">
+        <div className="flex h-full flex-col justify-between rounded-xl border border-slate-100 bg-white p-6 shadow-xs transition-all duration-300 hover:shadow-md sm:p-8">
             <div>
                 {/* Rating Stars */}
-                <div className="flex items-center gap-1 text-amber-400">
+                <div className="flex items-center gap-0.5 text-blue-600">
                     {[...Array(5)].map((_, i) => (
                         <svg
                             key={i}
-                            className={`h-4 w-4 ${
-                                i < rating ? 'fill-amber-400' : 'fill-slate-200'
+                            className={`h-3.5 w-3.5 ${
+                                i < rating ? 'fill-blue-600' : 'fill-slate-200'
                             }`}
                             viewBox="0 0 20 20"
                         >
@@ -25,22 +25,22 @@ export default function TestimonialCard({
                 </div>
 
                 {/* Quote Text */}
-                <p className="mt-4 text-sm leading-relaxed text-slate-700 italic sm:text-base">
+                <p className="mt-4 text-sm leading-relaxed text-slate-600 sm:text-base">
                     "{quote}"
                 </p>
             </div>
 
             {/* Profile Info */}
-            <div className="mt-6 flex items-center gap-3 border-t border-slate-100 pt-4">
+            <div className="mt-6 flex items-center gap-3 border-t border-slate-50 pt-4">
                 <img
                     src={avatar}
                     alt={name}
-                    className="h-11 w-11 rounded-full object-cover ring-2 ring-[#4C83AD]/20"
+                    className="h-10 w-10 rounded-full object-cover grayscale hover:grayscale-0 transition-all duration-300"
                     loading="lazy"
                 />
                 <div>
                     <h4 className="text-sm font-bold text-slate-900">{name}</h4>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
                         {role} {location ? `• ${location}` : ''}
                     </p>
                 </div>

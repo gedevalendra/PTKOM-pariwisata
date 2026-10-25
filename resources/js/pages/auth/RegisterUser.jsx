@@ -1,11 +1,54 @@
-import InputError from '@/components/InputError';
 import AuthSplitLayout from '@/layouts/AuthSplitLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-const labelClassName = 'font-mono text-[10px] uppercase tracking-widest text-[#4C83AD]';
+const fontFamily = "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif";
+const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black';
 
-const inputClassName =
-    'mt-1.5 block w-full rounded-full border border-slate-200 bg-white px-5 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#4C83AD] focus:ring-[#4C83AD]';
+const inputClass = (hasError) =>
+    `block w-full rounded-md border bg-white px-3 py-2.5 text-sm text-black placeholder:text-neutral-400 focus:ring-1 ${
+        hasError
+            ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500'
+            : 'border-neutral-300 focus:border-black focus:ring-black'
+    }`;
+
+const fields = [
+    {
+        id: 'name',
+        label: 'Nama',
+        placeholder: 'Nama lengkap',
+        autoComplete: 'name',
+        required: true,
+    },
+    {
+        id: 'email',
+        label: 'Email',
+        type: 'email',
+        placeholder: 'nama@email.com',
+        autoComplete: 'username',
+        required: true,
+    },
+    {
+        id: 'phone_number',
+        label: 'Nomor kontak (opsional)',
+        type: 'tel',
+        placeholder: '+62 ...',
+        autoComplete: 'tel',
+    },
+    {
+        id: 'password',
+        label: 'Kata sandi',
+        type: 'password',
+        autoComplete: 'new-password',
+        required: true,
+    },
+    {
+        id: 'password_confirmation',
+        label: 'Konfirmasi kata sandi',
+        type: 'password',
+        autoComplete: 'new-password',
+        required: true,
+    },
+];
 
 export default function RegisterUser({ token }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -24,96 +67,75 @@ export default function RegisterUser({ token }) {
         });
     };
 
-    const fields = [
-        {
-            id: 'name',
-            label: 'Nama',
-            placeholder: 'Nama lengkap',
-            autoComplete: 'name',
-            required: true,
-        },
-        {
-            id: 'email',
-            label: 'Email',
-            type: 'email',
-            placeholder: 'nama@email.com',
-            autoComplete: 'username',
-            required: true,
-        },
-        {
-            id: 'phone_number',
-            label: 'Nomor Kontak',
-            type: 'tel',
-            placeholder: '+62 ...',
-            autoComplete: 'tel',
-        },
-        {
-            id: 'password',
-            label: 'Kata Sandi',
-            type: 'password',
-            placeholder: '••••••••',
-            autoComplete: 'new-password',
-            required: true,
-        },
-        {
-            id: 'password_confirmation',
-            label: 'Konfirmasi Kata Sandi',
-            type: 'password',
-            placeholder: '••••••••',
-            autoComplete: 'new-password',
-            required: true,
-        },
-    ];
-
     return (
         <AuthSplitLayout
             heading="Buat akun, lalu mulai perjalananmu."
             description="Isi informasi dasar Anda untuk menyimpan rencana perjalanan dan melanjutkan reservasi."
-            cardClassName="bg-[#FBEFF2]"
+            cardClassName="bg-white"
         >
-            <Head title="Buat Akun - Jelajah Lampung" />
+            <Head title="Buat akun - Jelajah Lampung">
+                <link rel="preconnect" href="https://fonts.bunny.net" />
+                <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600" rel="stylesheet" />
+            </Head>
 
-            <h2 className="font-serif text-3xl font-semibold text-[#1E3A34]">Buat akun</h2>
-            <p className="mt-2 text-xs text-slate-600">Lengkapi data berikut untuk melanjutkan reservasi.</p>
+            <div style={{ fontFamily }} className="antialiased">
+                <h2 className="text-2xl font-medium tracking-tight text-black">Buat akun</h2>
+                <p className="mt-2 text-sm text-neutral-500">Lengkapi data berikut untuk melanjutkan reservasi.</p>
 
-            <form onSubmit={submit} className="mt-6 space-y-4">
-                {fields.map((field, index) => (
-                    <div key={field.id}>
-                        <label htmlFor={field.id} className={labelClassName}>
-                            {field.label}
-                        </label>
-                        <input
-                            id={field.id}
-                            name={field.id}
-                            type={field.type ?? 'text'}
-                            value={data[field.id]}
-                            placeholder={field.placeholder}
-                            autoComplete={field.autoComplete}
-                            autoFocus={index === 0}
-                            required={field.required}
-                            className={inputClassName}
-                            onChange={(e) => setData(field.id, e.target.value)}
-                        />
-                        <InputError message={errors[field.id]} className="mt-2" />
-                    </div>
-                ))}
+                <form onSubmit={submit} className="mt-8 flex flex-col gap-5">
+                    {fields.map((field, index) => (
+                        <div key={field.id} className="grid gap-1.5">
+                            <label htmlFor={field.id} className="text-sm text-neutral-500">
+                                {field.label}
+                            </label>
+                            <input
+                                id={field.id}
+                                name={field.id}
+                                type={field.type ?? 'text'}
+                                value={data[field.id]}
+                                placeholder={field.placeholder}
+                                autoComplete={field.autoComplete}
+                                autoFocus={index === 0}
+                                required={field.required}
+                                aria-invalid={!!errors[field.id]}
+                                aria-describedby={errors[field.id] ? `${field.id}-error` : undefined}
+                                className={inputClass(!!errors[field.id])}
+                                onChange={(e) => setData(field.id, e.target.value)}
+                            />
+                            {errors[field.id] && (
+                                <p id={`${field.id}-error`} role="alert" className="text-sm text-rose-600">
+                                    {errors[field.id]}
+                                </p>
+                            )}
+                        </div>
+                    ))}
 
-                <button
-                    type="submit"
-                    disabled={processing}
-                    className="!mt-8 w-full rounded-full bg-[#1E3A34] py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#152A25] disabled:opacity-60"
-                >
-                    Buat Akun &amp; Lanjut
-                </button>
-            </form>
+                    <button
+                        type="submit"
+                        disabled={processing}
+                        className={`mt-3 w-full rounded-md bg-[#4C83AD] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#3f7099] disabled:opacity-60 ${focusRing}`}
+                    >
+                        {processing ? 'Memproses...' : 'Daftar akun'}
+                    </button>
+                </form>
 
-            <div className="mt-6 flex flex-col items-center gap-2 text-xs">
-                <Link href={route('login')} className="text-[#4C83AD] transition hover:text-[#1E3A34]">
-                    Sudah punya akun? Masuk
-                </Link>
-                <Link href={route('registrasi.select')} className="text-slate-500 transition hover:text-slate-700">
-                    Kembali pilih tipe akun
-                </Link>
+                <div className="mt-8 flex flex-col items-start gap-2 text-sm text-neutral-500">
+                    <p>
+                        Sudah punya akun?{' '}
+                        <Link
+                            href={route('login')}
+                            className={`rounded-md font-medium text-black underline underline-offset-4 ${focusRing}`}
+                        >
+                            Masuk
+                        </Link>
+                    </p>
+                    <Link
+                        href={route('registrasi.select')}
+                        className={`rounded-md font-medium underline underline-offset-4 hover:text-black ${focusRing}`}
+                    >
+                        Kembali ke pilihan jenis akun
+                    </Link>
+                </div>
             </div>
         </AuthSplitLayout>
     );

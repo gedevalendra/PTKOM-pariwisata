@@ -16,7 +16,7 @@ const quickLinks = [
 
 export default function PublicFooter() {
     return (
-        <footer className="bg-[#152A25] text-slate-400">
+        <footer className="bg-slate-900 text-slate-400">
             <div className="mx-auto max-w-7xl px-6 py-16 sm:px-8 lg:px-12">
                 <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
                     <div className="space-y-4 md:col-span-1">
@@ -25,7 +25,7 @@ export default function PublicFooter() {
                             className="font-serif text-2xl tracking-tight text-white"
                         >
                             <span>Jelajah</span>{' '}
-                            <span className="font-normal italic text-[#E8C5C8]">
+                            <span className="font-normal italic text-blue-400">
                                 Lampung
                             </span>
                         </Link>

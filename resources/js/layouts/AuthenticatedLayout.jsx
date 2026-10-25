@@ -30,13 +30,21 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Dashboard
                                 </NavLink>
-                                {(user.role === 'admin' || user.role === 'business') && (
-                                    <NavLink
-                                        href={route('manage.destinations.index')}
-                                        active={route().current('manage.destinations.*')}
-                                    >
-                                        Kelola Destinasi
-                                    </NavLink>
+                                {user.role === 'admin' && (
+                                    <>
+                                        <NavLink
+                                            href={route('admin.destinations.index')}
+                                            active={route().current('admin.destinations.*')}
+                                        >
+                                            Kelola Destinasi
+                                        </NavLink>
+                                        <NavLink
+                                            href={route('admin.business-validation.index')}
+                                            active={route().current('admin.business-validation.*')}
+                                        >
+                                            Validasi Mitra
+                                        </NavLink>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -142,13 +150,21 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Dashboard
                         </ResponsiveNavLink>
-                        {(user.role === 'admin' || user.role === 'business') && (
-                            <ResponsiveNavLink
-                                href={route('manage.destinations.index')}
-                                active={route().current('manage.destinations.*')}
-                            >
-                                Kelola Destinasi
-                            </ResponsiveNavLink>
+                        {user.role === 'admin' && (
+                            <>
+                                <ResponsiveNavLink
+                                    href={route('admin.destinations.index')}
+                                    active={route().current('admin.destinations.*')}
+                                >
+                                    Kelola Destinasi
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('admin.business-validation.index')}
+                                    active={route().current('admin.business-validation.*')}
+                                >
+                                    Validasi Mitra
+                                </ResponsiveNavLink>
+                            </>
                         )}
                     </div>
 

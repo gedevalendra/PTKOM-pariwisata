@@ -1,28 +1,29 @@
 import AuthSplitLayout from '@/layouts/AuthSplitLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowRight, Store, UserCheck } from 'lucide-react';
+import { useState } from 'react';
+
+const fontFamily = "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif";
+const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black';
 
 const accountTypes = [
     {
         type: 'user',
-        title: 'Akun Wisatawan / Pengguna',
-        description:
-            'Jelajahi destinasi, beri ulasan, dan simpan favorit perjalanan Anda.',
-        icon: UserCheck,
+        title: 'Wisatawan',
+        description: 'Jelajahi destinasi, beri ulasan, dan simpan favorit.',
     },
     {
         type: 'business_owner',
-        title: 'Akun Pemilik Usaha / Mitra',
-        description:
-            'Daftarkan kuliner, penginapan, atau wisata Anda & ikuti verifikasi admin.',
-        icon: Store,
+        title: 'Pemilik usaha',
+        description: 'Daftarkan kuliner, penginapan, atau wisata Anda. Akun diverifikasi admin.',
     },
 ];
 
 export default function RegisterSelect() {
     const { transform, post, processing } = useForm({ type: 'user' });
+    const [selected, setSelected] = useState(null);
 
     const selectType = (selectedType) => {
+        setSelected(selectedType);
         transform(() => ({ type: selectedType }));
         post(route('registrasi.generate'));
     };
@@ -31,51 +32,44 @@ export default function RegisterSelect() {
         <AuthSplitLayout
             heading="Buat akun, lalu mulai perjalananmu."
             description="Pilih jenis akun sesuai kebutuhan Anda untuk mulai menjelajahi Lampung."
-            cardClassName="bg-[#FBEFF2]"
+            cardClassName="bg-white"
         >
-            <Head title="Pilih Jenis Akun - Jelajah Lampung" />
+            <Head title="Pilih jenis akun - Jelajah Lampung">
+                <link rel="preconnect" href="https://fonts.bunny.net" />
+                <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600" rel="stylesheet" />
+            </Head>
 
-            <h2 className="font-serif text-3xl font-semibold text-[#1E3A34]">
-                Pilih jenis akun
-            </h2>
-            <p className="mt-2 text-xs text-slate-600">
-                Silakan pilih kategori pendaftaran sesuai kebutuhan Anda.
-            </p>
+            <div style={{ fontFamily }} className="antialiased">
+                <h2 className="text-2xl font-medium tracking-tight text-black">Pilih jenis akun</h2>
 
-            <div className="mt-6 space-y-3">
-                {accountTypes.map(({ type, title, description, icon: Icon }) => (
-                    <button
-                        key={type}
-                        type="button"
-                        disabled={processing}
-                        onClick={() => selectType(type)}
-                        className="group flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-[#4C83AD] hover:shadow-sm disabled:opacity-60"
+                <ul className="mt-8 flex flex-col gap-3">
+                    {accountTypes.map(({ type, title, description }) => (
+                        <li key={type}>
+                            <button
+                                type="button"
+                                disabled={processing}
+                                onClick={() => selectType(type)}
+                                className={`w-full rounded-md bg-black px-5 py-4 text-left text-white transition hover:bg-neutral-800 disabled:opacity-60 ${focusRing}`}
+                            >
+                                <span className="block text-base font-medium">
+                                    {processing && selected === type ? 'Memproses...' : title}
+                                </span>
+                                <span className="mt-1 block text-sm text-neutral-300">{description}</span>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+
+                <p className="mt-8 text-sm text-neutral-500">
+                    Sudah punya akun?{' '}
+                    <Link
+                        href={route('login')}
+                        className={`rounded-md font-medium text-black underline underline-offset-4 ${focusRing}`}
                     >
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#E4EEF7] text-[#4C83AD] transition group-hover:bg-[#4C83AD] group-hover:text-white">
-                            <Icon className="h-5 w-5" />
-                        </span>
-                        <span className="flex-1">
-                            <span className="block font-serif text-base font-semibold text-[#1E3A34]">
-                                {title}
-                            </span>
-                            <span className="mt-0.5 block text-xs text-slate-500">
-                                {description}
-                            </span>
-                        </span>
-                        <ArrowRight className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:text-[#4C83AD]" />
-                    </button>
-                ))}
+                        Masuk
+                    </Link>
+                </p>
             </div>
-
-            <p className="mt-8 text-center text-xs text-slate-700">
-                Sudah punya akun?{' '}
-                <Link
-                    href={route('login')}
-                    className="text-[#4C83AD] transition hover:text-[#1E3A34]"
-                >
-                    Masuk
-                </Link>
-            </p>
         </AuthSplitLayout>
     );
 }

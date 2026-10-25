@@ -17,14 +17,14 @@ export default function PublicNavbar() {
         !href.includes('#') && currentUrl.startsWith(href);
 
     return (
-        <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/50 bg-white/80 shadow-xs backdrop-blur-md">
+        <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-100 bg-white/90 shadow-2xs backdrop-blur-md">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-8 lg:px-12">
                 <div className="flex items-center">
                     <Link href="/" className="font-serif text-2xl tracking-tight">
-                        <span className="font-semibold text-[#2D4D43]">
+                        <span className="font-semibold text-slate-900">
                             Jelajah
                         </span>{' '}
-                        <span className="font-normal italic text-[#4C83AD]">
+                        <span className="font-normal italic text-blue-600">
                             Lampung
                         </span>
                     </Link>
@@ -35,10 +35,10 @@ export default function PublicNavbar() {
                         <a
                             key={link.label}
                             href={link.href}
-                            className={`text-sm font-medium transition hover:text-[#4C83AD] ${
+                            className={`text-sm font-medium transition hover:text-blue-600 ${
                                 isActive(link.href)
-                                    ? 'text-[#4C83AD]'
-                                    : 'text-slate-700'
+                                    ? 'text-blue-600 font-semibold'
+                                    : 'text-slate-600'
                             }`}
                         >
                             {link.label}
@@ -46,11 +46,11 @@ export default function PublicNavbar() {
                     ))}
                 </div>
 
-                <div className="hidden items-center gap-3 md:flex">
+                <div className="hidden items-center gap-4 md:flex">
                     {auth?.user ? (
                         <Link
                             href={route('dashboard')}
-                            className="rounded-full bg-[#4C83AD] px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#3d6d93]"
+                            className="rounded-lg bg-slate-900 px-5 py-2 text-xs font-semibold text-white transition hover:bg-blue-600"
                         >
                             Dashboard
                         </Link>
@@ -58,15 +58,15 @@ export default function PublicNavbar() {
                         <>
                             <Link
                                 href={route('login')}
-                                className="text-sm font-medium text-slate-700 transition hover:text-[#4C83AD]"
+                                className="text-xs font-semibold uppercase tracking-wider text-slate-700 transition hover:text-blue-600"
                             >
                                 Masuk
                             </Link>
                             <Link
                                 href={route('registrasi.select')}
-                                className="rounded-full bg-[#4C83AD] px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#3d6d93]"
+                                className="rounded-lg bg-slate-900 px-5 py-2 text-xs font-semibold tracking-wider uppercase text-white transition hover:bg-blue-600"
                             >
-                                Daftar Akun
+                                Daftar
                             </Link>
                         </>
                     )}

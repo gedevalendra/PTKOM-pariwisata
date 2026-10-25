@@ -1,19 +1,36 @@
-import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { FormEventHandler, ReactNode } from 'react';
 
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
-
-interface RegisterForm {
+type RegisterForm = {
     name: string;
     email: string;
     password: string;
     password_confirmation: string;
+};
+
+const fontFamily = "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif";
+const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black';
+
+const inputClass =
+    'w-full rounded-none border-0 border-b bg-transparent px-0 py-2 text-base text-black transition-colors focus:outline-none focus:ring-0';
+
+const fieldClass = (hasError: boolean) =>
+    `${inputClass} ${hasError ? 'border-rose-500 focus:border-rose-500' : 'border-neutral-300 focus:border-black'}`;
+
+function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: ReactNode }) {
+    return (
+        <div className="grid gap-1">
+            <label htmlFor={id} className="text-sm text-neutral-500">
+                {label}
+            </label>
+            {children}
+            {error && (
+                <p id={`${id}-error`} role="alert" className="pt-1 text-sm text-rose-600">
+                    {error}
+                </p>
+            )}
+        </div>
+    );
 }
 
 export default function Register() {
@@ -26,94 +43,77 @@ export default function Register() {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
+
         post(route('register'), {
             onFinish: () => reset('password', 'password_confirmation'),
         });
     };
 
+    const fieldProps = (key: keyof RegisterForm) => ({
+        id: key,
+        name: key,
+        required: true,
+        value: data[key],
+        'aria-invalid': !!errors[key],
+        'aria-describedby': errors[key] ? `${key}-error` : undefined,
+        className: fieldClass(!!errors[key]),
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => setData(key, e.target.value),
+    });
+
     return (
-        <AuthLayout title="Create an account" description="Enter your details below to create your account">
-            <Head title="Register" />
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                            id="name"
-                            type="text"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
+        <>
+            <Head title="Daftar - Jelajah Lampung">
+                <link rel="preconnect" href="https://fonts.bunny.net" />
+                <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600" rel="stylesheet" />
+            </Head>
+
+            <div className="flex min-h-screen flex-col bg-white px-6 py-8 text-neutral-800 antialiased" style={{ fontFamily }}>
+                <header className="mx-auto w-full max-w-xs">
+                    <Link href="/" className={`w-fit rounded-md text-sm font-medium text-black ${focusRing}`}>
+                        Jelajah Lampung
+                    </Link>
+                </header>
+
+                <main className="mx-auto flex w-full max-w-xs flex-1 flex-col justify-center py-16">
+                    <h1 className="text-2xl font-medium tracking-tight text-black">Buat akun</h1>
+
+                    <form onSubmit={submit} className="mt-10 flex flex-col gap-7">
+                        <Field id="name" label="Nama" error={errors.name}>
+                            <input {...fieldProps('name')} type="text" autoFocus autoComplete="name" />
+                        </Field>
+
+                        <Field id="email" label="Email" error={errors.email}>
+                            <input {...fieldProps('email')} type="email" autoComplete="username" />
+                        </Field>
+
+                        <Field id="password" label="Kata sandi" error={errors.password}>
+                            <input {...fieldProps('password')} type="password" autoComplete="new-password" />
+                        </Field>
+
+                        <Field id="password_confirmation" label="Konfirmasi kata sandi" error={errors.password_confirmation}>
+                            <input {...fieldProps('password_confirmation')} type="password" autoComplete="new-password" />
+                        </Field>
+
+                        <button
+                            type="submit"
                             disabled={processing}
-                            placeholder="Full name"
-                        />
-                        <InputError message={errors.name} className="mt-2" />
-                    </div>
+                            className={`mt-3 w-full rounded-md bg-[#4C83AD] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#3f7099] disabled:opacity-60 ${focusRing}`}
+                        >
+                            {processing ? 'Memproses...' : 'Daftar akun'}
+                        </button>
+                    </form>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            required
-                            tabIndex={2}
-                            autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            disabled={processing}
-                            placeholder="email@example.com"
-                        />
-                        <InputError message={errors.email} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={3}
-                            autoComplete="new-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            disabled={processing}
-                            placeholder="Password"
-                        />
-                        <InputError message={errors.password} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="password_confirmation">Confirm password</Label>
-                        <Input
-                            id="password_confirmation"
-                            type="password"
-                            required
-                            tabIndex={4}
-                            autoComplete="new-password"
-                            value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            disabled={processing}
-                            placeholder="Confirm password"
-                        />
-                        <InputError message={errors.password_confirmation} />
-                    </div>
-
-                    <Button type="submit" className="mt-2 w-full" tabIndex={5} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Create account
-                    </Button>
-                </div>
-
-                <div className="text-muted-foreground text-center text-sm">
-                    Already have an account?{' '}
-                    <TextLink href={route('login')} tabIndex={6}>
-                        Log in
-                    </TextLink>
-                </div>
-            </form>
-        </AuthLayout>
+                    <p className="mt-8 text-sm text-neutral-500">
+                        Sudah punya akun?{' '}
+                        <Link
+                            href={route('login')}
+                            className={`rounded-md font-medium text-black underline underline-offset-4 ${focusRing}`}
+                        >
+                            Masuk
+                        </Link>
+                    </p>
+                </main>
+            </div>
+        </>
     );
 }
