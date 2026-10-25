@@ -34,7 +34,6 @@ Dokumen ini adalah acuan gaya visual untuk semua halaman Jelajah Lampung (landin
 
 Aturan:
 
-
 - Biru **hanya** untuk: tombol utama, tab/filter aktif (garis bawah), titik aksen kecil. Jangan dipakai untuk teks panjang, latar seksi, atau dekorasi.
 - Halaman publik memakai skala `slate`. Halaman auth memakai skala `neutral` dan hitam murni untuk teks utama dan fokus. Jangan dicampur dalam satu halaman.
 - Jangan menambah warna baru tanpa alasan fungsional.
