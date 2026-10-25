@@ -80,7 +80,7 @@ export default function PublicNavbar() {
                                 </Link>
                                 <Link
                                     href={route('registrasi.select')}
-                                    className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold tracking-wider uppercase text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700"
+                                    className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-5 py-2.5 text-xs font-bold tracking-wider uppercase text-white transition hover:bg-blue-700"
                                 >
                                     <i className="bx bx-user-plus text-base"></i>
                                     Daftar
@@ -139,7 +139,7 @@ export default function PublicNavbar() {
                                     </Link>
                                     <Link
                                         href={route('registrasi.select')}
-                                        className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-center text-sm font-semibold text-white shadow-md shadow-blue-500/20"
+                                        className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-6 py-3 text-center text-sm font-semibold text-white"
                                     >
                                         <i className="bx bx-user-plus text-lg"></i>
                                         Daftar
