@@ -151,7 +151,7 @@ function SectionHeader({ title, description, centered = false }) {
             <h2 className="text-3xl leading-tight font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
                 {title}
             </h2>
-            {description && <p className="mt-4 text-lg leading-relaxed text-slate-600">{description}</p>}
+            {description && <p className="mt-4 text-lg leading-relaxed text-center text-slate-600">{description}</p>}
         </div>
     );
 }
@@ -240,7 +240,7 @@ export default function Index({
                     {/* Destinasi */}
                     <section id="destinations" className="py-24 sm:py-32">
                         <div className={container}>
-                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+                            <div className="flex flex-col items-center justify-center gap-8 mb-12">
                                 <SectionHeader
                                     title="Tempat yang Wajib Dikunjungi"
                                     description="Destinasi terbaik di Lampung, dari kepulauan tropis hingga taman nasional bersejarah."
