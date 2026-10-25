@@ -32,7 +32,6 @@ Dokumen ini adalah acuan gaya visual untuk semua halaman Jelajah Lampung (landin
 | Error | `rose-600` (teks), `rose-500` (border) |
 | Status sukses | `green-700` |
 
-
 Aturan:
 
 - Biru **hanya** untuk: tombol utama, tab/filter aktif (garis bawah), titik aksen kecil. Jangan dipakai untuk teks panjang, latar seksi, atau dekorasi.
