@@ -10,6 +10,9 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600|fraunces:400,500,600,400i,500i&display=swap" rel="stylesheet" />
 
+        <!-- Boxicons -->
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
         <!-- Scripts -->
         @routes
         @viteReactRefresh

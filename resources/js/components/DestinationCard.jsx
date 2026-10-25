@@ -7,41 +7,64 @@ export default function DestinationCard({
     reviewCount = 120,
     description,
     price,
-    href = '#',
+    slug,
+    href,
 }) {
+    const destinationUrl = slug ? route('destinations.show', slug) : (href || '/destinations');
+
     return (
-        <article className="group relative flex flex-col rounded-md has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-[#4C83AD]">
-            <div className="aspect-[4/3] overflow-hidden rounded-md bg-slate-100">
+        <article className="group relative flex flex-col rounded-2xl bg-white border border-slate-200/80 p-3.5 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100">
                 <img
                     src={image}
                     alt={title}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-            </div>
-
-            <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="font-medium text-[#4C83AD]">{category}</span>
-                <span className="flex items-center gap-1 text-slate-700">
-                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    {rating}
-                    <span className="text-slate-400">({reviewCount})</span>
+                <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-slate-900/80 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white border border-white/10">
+                    <i className="bx bx-category-alt text-blue-400"></i>
+                    {category}
                 </span>
             </div>
 
-            <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-900">
-                <a href={href} className="outline-none after:absolute after:inset-0">
-                    {title}
-                </a>
-            </h3>
+            <div className="p-2 flex-1 flex flex-col justify-between">
+                <div>
+                    <div className="mt-3 flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-1 text-slate-500">
+                            <i className="bx bx-map-pin text-blue-600 text-sm"></i>
+                            {location}
+                        </span>
+                        <span className="flex items-center gap-1 font-semibold text-amber-500">
+                            <i className="bx bxs-star text-sm"></i>
+                            {rating}
+                            <span className="font-normal text-slate-400">({reviewCount})</span>
+                        </span>
+                    </div>
 
-            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-500">{description}</p>
+                    <h3 className="mt-2 text-lg font-bold tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
+                        <a href={destinationUrl} className="outline-none">
+                            {title}
+                        </a>
+                    </h3>
 
-            <div className="mt-4 flex items-center justify-between gap-4 border-t border-slate-200 pt-4 text-sm">
-                <span className="text-slate-500">{location}</span>
-                <span className="font-medium text-slate-900">{price}</span>
+                    <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-slate-500">
+                        {description}
+                    </p>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                    <div>
+                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Harga Tiket</span>
+                        <span className="text-sm font-bold text-blue-600">{price}</span>
+                    </div>
+                    <a
+                        href={destinationUrl}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+                    >
+                        <span>Detail</span>
+                        <i className="bx bx-right-arrow-alt text-base group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
             </div>
         </article>
     );

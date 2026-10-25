@@ -7,41 +7,41 @@ export default function TestimonialCard({
     location,
 }) {
     return (
-        <div className="flex h-full flex-col justify-between rounded-xl border border-slate-100 bg-white p-6 shadow-xs transition-all duration-300 hover:shadow-md sm:p-8">
+        <div className="flex h-full flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
             <div>
                 {/* Rating Stars */}
-                <div className="flex items-center gap-0.5 text-blue-600">
+                <div className="flex items-center gap-1 text-amber-400 mb-4">
                     {[...Array(5)].map((_, i) => (
-                        <svg
+                        <i
                             key={i}
-                            className={`h-3.5 w-3.5 ${
-                                i < rating ? 'fill-blue-600' : 'fill-slate-200'
+                            className={`bx ${
+                                i < rating ? 'bxs-star text-lg' : 'bx-star text-slate-200'
                             }`}
-                            viewBox="0 0 20 20"
-                        >
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
+                        ></i>
                     ))}
                 </div>
 
                 {/* Quote Text */}
-                <p className="mt-4 text-sm leading-relaxed text-slate-600 sm:text-base">
-                    "{quote}"
-                </p>
+                <div className="relative">
+                    <i className="bx bxs-quote-alt-left text-3xl text-blue-100 absolute -top-3 -left-2 -z-0"></i>
+                    <p className="relative z-10 text-sm leading-relaxed text-slate-600 italic">
+                        "{quote}"
+                    </p>
+                </div>
             </div>
 
             {/* Profile Info */}
-            <div className="mt-6 flex items-center gap-3 border-t border-slate-50 pt-4">
+            <div className="mt-8 flex items-center gap-3.5 border-t border-slate-100 pt-5">
                 <img
                     src={avatar}
                     alt={name}
-                    className="h-10 w-10 rounded-full object-cover grayscale hover:grayscale-0 transition-all duration-300"
+                    className="h-12 w-12 rounded-full object-cover ring-2 ring-blue-100"
                     loading="lazy"
                 />
                 <div>
                     <h4 className="text-sm font-bold text-slate-900">{name}</h4>
-                    <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                        {role} {location ? `• ${location}` : ''}
+                    <p className="text-xs text-slate-500">
+                        {role} {location ? <span className="text-slate-400">• {location}</span> : ''}
                     </p>
                 </div>
             </div>

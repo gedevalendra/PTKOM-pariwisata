@@ -46,7 +46,7 @@ Route::get('/', function () {
         'categories' => $categories,
         'statistics' => $stats,
     ]);
-});
+})->name('home');
 
 Route::get('/destinations', function () {
     $destinations = Destination::with(['category', 'images'])->latest()->get()->map(function ($dest) {
@@ -73,6 +73,45 @@ Route::get('/destinations', function () {
         'categories' => $categories,
     ]);
 })->name('destinations.index');
+
+Route::get('/destinations/{destination:slug}', function (string $slug) {
+    $destination = Destination::where('slug', $slug)->with(['category', 'images'])->first();
+    
+    if (!$destination) {
+        // Fallback for static/mock data that doesn't exist in DB yet
+        $destination = new Destination([
+            'name' => str_replace('-', ' ', ucwords($slug, '-')),
+            'slug' => $slug,
+            'description' => 'Deskripsi lengkap destinasi ini akan segera hadir. Lampung memiliki sejuta pesona alam yang menanti untuk Anda jelajahi.',
+            'price' => 50000,
+            'rating' => 4.8,
+            'location' => 'Provinsi Lampung'
+        ]);
+    }
+
+    // Mocking additional details for the new page structure
+    $destination->tagline = 'Destinasi Wisata Unggulan Lampung';
+    $destination->opening_hours = '08:00 - 17:00 WIB';
+    $destination->facilities = ['Area Parkir', 'Toilet Umum', 'Mushola', 'Spot Foto'];
+    $destination->tips = [
+        'Gunakan pakaian yang nyaman',
+        'Bawa kamera untuk mengabadikan momen',
+        'Jaga kebersihan lingkungan sekitar',
+        'Patuhi protokol kesehatan dan aturan lokal'
+    ];
+
+    return Inertia::render('Destinations/Show/Index', [
+        'destination' => $destination,
+    ]);
+})->name('destinations.show');
+
+Route::get('/gallery', function () {
+    return Inertia::render('Gallery/Index');
+})->name('gallery.index');
+
+Route::get('/testimonials', function () {
+    return Inertia::render('Testimonials/Index');
+})->name('testimonials.index');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

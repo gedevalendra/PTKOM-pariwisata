@@ -40,7 +40,7 @@ export default function Welcome() {
                 <header className="mx-auto w-full max-w-xl text-sm">
                     <span className="flex w-fit items-center gap-2 font-medium text-slate-900">
                         <span className="h-2 w-2 rounded-full bg-[#4C83AD]" aria-hidden="true" />
-                        Jelajah Lampung
+                        WonderLy
                     </span>
                 </header>
 

@@ -1,12 +1,13 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 
 const fontFamily = "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif";
-const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#4C83AD]';
+const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600';
 const inputClass =
-    'w-full rounded-md border bg-white px-3 py-2.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:outline-none focus:ring-1';
+    'w-full rounded-2xl border bg-slate-50/50 px-4 py-3.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:bg-white';
 
 const fieldClass = (hasError) =>
-    `${inputClass} ${hasError ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500' : 'border-slate-200 focus:border-[#4C83AD] focus:ring-[#4C83AD]'}`;
+    `${inputClass} ${hasError ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20' : 'border-slate-200 focus:border-blue-600 focus:ring-blue-600/20'}`;
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -15,8 +16,40 @@ export default function Login({ status, canResetPassword }) {
         remember: false,
     });
 
+    const [savedAccounts, setSavedAccounts] = useState([]);
+
+    useEffect(() => {
+        try {
+            const accounts = JSON.parse(localStorage.getItem('wonderly_local_accounts') || '[]');
+            setSavedAccounts(accounts);
+        } catch {
+            setSavedAccounts([]);
+        }
+    }, []);
+
+    const fillTestAccount = (email, password) => {
+        setData({
+            email: email,
+            password: password,
+            remember: true
+        });
+    };
+
     const submit = (e) => {
         e.preventDefault();
+
+        // Check local storage accounts first for quick test simulation
+        try {
+            const accounts = JSON.parse(localStorage.getItem('wonderly_local_accounts') || '[]');
+            const found = accounts.find(acc => acc.email === data.email);
+            if (found && found.password === data.password) {
+                alert(`Berhasil masuk sebagai ${found.role === 'admin' ? 'Admin' : 'Pemilik Usaha'} (${found.name})!`);
+                window.location.href = route('dashboard');
+                return;
+            }
+        } catch (err) {
+            console.error(err);
+        }
 
         post(route('login'), {
             onFinish: () => reset('password'),
@@ -25,121 +58,177 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <>
-            <Head title="Masuk - Jelajah Lampung">
+            <Head title="Masuk - Wonderly Lampung">
                 <link rel="preconnect" href="https://fonts.bunny.net" />
-                <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600" rel="stylesheet" />
+                <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700" rel="stylesheet" />
             </Head>
 
-            <div className="flex min-h-screen flex-col bg-white px-6 py-6 text-slate-800 antialiased sm:px-10" style={{ fontFamily }}>
-                <header className="mx-auto w-full max-w-sm text-sm">
-                    <Link href="/" className={`flex w-fit items-center gap-2 rounded-sm font-medium text-slate-900 ${focusRing}`}>
-                        <span className="h-2 w-2 rounded-full bg-[#4C83AD]" aria-hidden="true" />
-                        Jelajah Lampung
-                    </Link>
-                </header>
-
-                <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-16">
-                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Selamat datang kembali</h1>
-                    <p className="mt-2 text-slate-600">Masuk ke akun Jelajah Lampung Anda.</p>
-
-                    {status && (
-                        <p role="status" className="mt-6 text-sm font-medium text-green-700">
-                            {status}
-                        </p>
-                    )}
-
-                    <form onSubmit={submit} className="mt-8 flex flex-col gap-5">
-                        <div className="grid gap-2">
-                            <label htmlFor="email" className="text-sm font-medium text-slate-900">
-                                Email
-                            </label>
-                            <input
-                                id="email"
-                                type="email"
-                                name="email"
-                                required
-                                autoFocus
-                                autoComplete="username"
-                                value={data.email}
-                                placeholder="nama@email.com"
-                                aria-invalid={!!errors.email}
-                                aria-describedby={errors.email ? 'email-error' : undefined}
-                                className={fieldClass(!!errors.email)}
-                                onChange={(e) => setData('email', e.target.value)}
-                            />
-                            {errors.email && (
-                                <p id="email-error" role="alert" className="text-sm text-rose-600">
-                                    {errors.email}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="grid gap-2">
-                            <label htmlFor="password" className="text-sm font-medium text-slate-900">
-                                Kata sandi
-                            </label>
-                            <input
-                                id="password"
-                                type="password"
-                                name="password"
-                                required
-                                autoComplete="current-password"
-                                value={data.password}
-                                placeholder="Kata sandi"
-                                aria-invalid={!!errors.password}
-                                aria-describedby={errors.password ? 'password-error' : undefined}
-                                className={fieldClass(!!errors.password)}
-                                onChange={(e) => setData('password', e.target.value)}
-                            />
-                            {errors.password && (
-                                <p id="password-error" role="alert" className="text-sm text-rose-600">
-                                    {errors.password}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="flex items-center justify-between gap-4 text-sm">
-                            <label htmlFor="remember" className="flex cursor-pointer items-center gap-2 text-slate-600">
-                                <input
-                                    id="remember"
-                                    name="remember"
-                                    type="checkbox"
-                                    checked={data.remember}
-                                    onChange={(e) => setData('remember', e.target.checked)}
-                                    className="h-4 w-4 rounded-sm border-slate-300 accent-[#4C83AD]"
-                                />
-                                Ingat saya
-                            </label>
-
-                            {canResetPassword && (
-                                <Link
-                                    href={route('password.request')}
-                                    className={`rounded-sm text-slate-500 underline underline-offset-4 transition hover:text-slate-900 ${focusRing}`}
-                                >
-                                    Lupa kata sandi?
-                                </Link>
-                            )}
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className={`mt-2 w-full rounded-md bg-[#4C83AD] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#3f7099] disabled:opacity-60 ${focusRing}`}
-                        >
-                            {processing ? 'Memproses...' : 'Masuk'}
-                        </button>
-                    </form>
-
-                    <p className="mt-8 text-sm text-slate-600">
-                        Belum punya akun?{' '}
-                        <Link
-                            href={route('registrasi.select')}
-                            className={`rounded-sm font-medium text-slate-900 underline underline-offset-4 transition hover:text-[#4C83AD] ${focusRing}`}
-                        >
-                            Daftar
+            <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white" style={{ fontFamily }}>
+                {/* Left: Form */}
+                <div className="flex flex-col justify-between p-8 sm:p-12 lg:p-16">
+                    <div>
+                        <Link href="/" className="inline-flex items-center gap-2.5 group">
+                            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+                                <i className="bx bxs-compass text-xl"></i>
+                            </div>
+                            <span className="font-serif text-2xl font-bold tracking-tight text-slate-900">
+                                Wonderly <span className="text-blue-600 font-sans text-xs uppercase font-extrabold tracking-widest ml-1 px-2 py-0.5 bg-blue-50 rounded-full border border-blue-100">Lampung</span>
+                            </span>
                         </Link>
-                    </p>
-                </main>
+                    </div>
+
+                    <div className="max-w-md w-full mx-auto py-10">
+                        <div className="mb-8">
+                            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">Selamat Datang</h1>
+                            <p className="mt-2 text-sm text-slate-500">Masuk untuk menjelajahi dan mengelola pariwisata Lampung.</p>
+                        </div>
+
+                        {/* Quick Test Accounts Fill */}
+                        <div className="mb-8 p-4 rounded-2xl bg-blue-50/50 border border-blue-100">
+                            <p className="text-xs font-bold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                <i className="bx bx-info-circle text-blue-600 text-base"></i>
+                                Akun Uji Coba Cepat (Test Accounts):
+                            </p>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => fillTestAccount('admin@lampung.com', 'password')}
+                                    className="px-3 py-2 rounded-xl bg-white border border-blue-200 text-xs font-semibold text-blue-700 hover:bg-blue-600 hover:text-white transition shadow-sm text-left flex items-center justify-between"
+                                >
+                                    <span>👑 Admin</span>
+                                    <i className="bx bx-right-arrow-alt"></i>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => fillTestAccount('mitra@lampung.com', 'password')}
+                                    className="px-3 py-2 rounded-xl bg-white border border-blue-200 text-xs font-semibold text-blue-700 hover:bg-blue-600 hover:text-white transition shadow-sm text-left flex items-center justify-between"
+                                >
+                                    <span>🏢 Pemilik Usaha</span>
+                                    <i className="bx bx-right-arrow-alt"></i>
+                                </button>
+                            </div>
+                            {savedAccounts.length > 0 && (
+                                <div className="mt-3 pt-3 border-t border-blue-200/60">
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Akun Tersimpan di LocalStorage:</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {savedAccounts.map((acc, idx) => (
+                                            <button
+                                                key={idx}
+                                                type="button"
+                                                onClick={() => fillTestAccount(acc.email, acc.password)}
+                                                className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-medium text-slate-700 hover:border-blue-600 transition"
+                                            >
+                                                {acc.name} ({acc.role})
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {status && (
+                            <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-medium">
+                                {status}
+                            </div>
+                        )}
+
+                        <form onSubmit={submit} className="space-y-5">
+                            <div>
+                                <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                                    Email
+                                </label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    required
+                                    autoFocus
+                                    autoComplete="username"
+                                    value={data.email}
+                                    placeholder="nama@email.com"
+                                    className={fieldClass(!!errors.email)}
+                                    onChange={(e) => setData('email', e.target.value)}
+                                />
+                                {errors.email && <p className="mt-1 text-xs text-rose-600 font-medium">{errors.email}</p>}
+                            </div>
+
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                                        Kata Sandi
+                                    </label>
+                                    {canResetPassword && (
+                                        <Link href={route('password.request')} className="text-xs font-semibold text-blue-600 hover:underline">
+                                            Lupa kata sandi?
+                                        </Link>
+                                    )}
+                                </div>
+                                <input
+                                    id="password"
+                                    type="password"
+                                    name="password"
+                                    required
+                                    autoComplete="current-password"
+                                    value={data.password}
+                                    placeholder="••••••••"
+                                    className={fieldClass(!!errors.password)}
+                                    onChange={(e) => setData('password', e.target.value)}
+                                />
+                                {errors.password && <p className="mt-1 text-xs text-rose-600 font-medium">{errors.password}</p>}
+                            </div>
+
+                            <div className="flex items-center">
+                                <label className="flex items-center gap-2 cursor-pointer select-none">
+                                    <input
+                                        type="checkbox"
+                                        checked={data.remember}
+                                        onChange={(e) => setData('remember', e.target.checked)}
+                                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span className="text-xs font-medium text-slate-600">Ingat saya di perangkat ini</span>
+                                </label>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="w-full py-4 rounded-2xl bg-blue-600 text-white font-bold text-sm tracking-wide shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition disabled:opacity-50"
+                            >
+                                {processing ? 'Memproses...' : 'Masuk ke Akun'}
+                            </button>
+                        </form>
+
+                        <p className="mt-8 text-center text-xs text-slate-500">
+                            Belum punya akun?{' '}
+                            <Link href={route('registrasi.select')} className="font-bold text-blue-600 hover:underline">
+                                Buat Akun Baru
+                            </Link>
+                        </p>
+                    </div>
+
+                    <div className="text-xs text-slate-400 text-center">
+                        &copy; {new Date().getFullYear()} Wonderly Lampung. All rights reserved.
+                    </div>
+                </div>
+
+                {/* Right: Image / Visual Banner */}
+                <div className="hidden lg:block relative overflow-hidden bg-slate-900">
+                    <img
+                        src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=1600&q=85"
+                        alt="Lampung Tourism"
+                        className="absolute inset-0 w-full h-full object-cover opacity-60"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+                    <div className="absolute bottom-16 left-16 right-16 text-white">
+                        <span className="px-3 py-1 rounded-full bg-blue-600/30 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-widest backdrop-blur-md">
+                            Wonderful Indonesia
+                        </span>
+                        <h2 className="mt-4 text-3xl font-extrabold tracking-tight">Jelajahi Pesona Sang Bumi Ruwa Jurai</h2>
+                        <p className="mt-2 text-sm text-slate-300 max-w-md leading-relaxed">
+                            Temukan destinasi bahari menawan, margasatwa eksotis, dan kehangatan budaya lokal dalam satu platform terpadu.
+                        </p>
+                    </div>
+                </div>
             </div>
         </>
     );
