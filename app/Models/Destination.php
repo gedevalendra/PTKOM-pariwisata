@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -8,7 +9,26 @@ class Destination extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['category_id', 'name', 'slug', 'description', 'price', 'location', 'rating'];
+    protected $fillable = [
+        'user_id',
+        'category_id',
+        'name',
+        'slug',
+        'description',
+        'content',
+        'price',
+        'discount_price',
+        'location',
+        'opening_time',
+        'closing_time',
+        'rating',
+        'is_published',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function category()
     {

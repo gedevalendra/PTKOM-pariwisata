@@ -30,6 +30,14 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Dashboard
                                 </NavLink>
+                                {(user.role === 'admin' || user.role === 'business') && (
+                                    <NavLink
+                                        href={route('manage.destinations.index')}
+                                        active={route().current('manage.destinations.*')}
+                                    >
+                                        Kelola Destinasi
+                                    </NavLink>
+                                )}
                             </div>
                         </div>
 
@@ -134,6 +142,14 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                        {(user.role === 'admin' || user.role === 'business') && (
+                            <ResponsiveNavLink
+                                href={route('manage.destinations.index')}
+                                active={route().current('manage.destinations.*')}
+                            >
+                                Kelola Destinasi
+                            </ResponsiveNavLink>
+                        )}
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">

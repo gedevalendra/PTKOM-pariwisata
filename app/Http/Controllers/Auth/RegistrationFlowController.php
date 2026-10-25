@@ -57,7 +57,7 @@ class RegistrationFlowController extends Controller
     {
         $tokenId = $request->query('id');
 
-        if (!$tokenId) {
+        if (! $tokenId) {
             return redirect()->route('registrasi.select')->with('error', 'Token registrasi diperlukan.');
         }
 
@@ -66,7 +66,7 @@ class RegistrationFlowController extends Controller
             ->where('expires_at', '>', now())
             ->first();
 
-        if (!$token) {
+        if (! $token) {
             return Inertia::render('auth/RegisterInvalidToken', [
                 'message' => 'Token pendaftaran tidak valid, telah kedaluwarsa, atau sudah digunakan sebelumnya.',
             ]);
@@ -97,7 +97,7 @@ class RegistrationFlowController extends Controller
             ->where('expires_at', '>', now())
             ->first();
 
-        if (!$token) {
+        if (! $token) {
             return redirect()->route('registrasi.select')->with('error', 'Sesi registrasi Anda telah kedaluwarsa atau token tidak valid.');
         }
 
