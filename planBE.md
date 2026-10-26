@@ -193,6 +193,186 @@ Dokumen ini merangkum analisis lengkap mengenai kekurangan, celah keamanan, bug 
 ---
 
 ## 🏆 Kesimpulan Progres
-Seluruh **12 dari 12 tugas (100%)** dalam rencana kerja backend telah berhasil diselesaikan, teruji, dan diverifikasi dengan 54 automated feature tests tanpa kendala.
+Seluruh **12 dari 12 tugas (100%)** dalam rencana kerja backend telah berhasil diselesaikan, teruji, dan diverifikasi dengan 54 automated feature tests (pada saat Fase 1 selesai; setelah Fase 2 total menjadi 82 test) tanpa kendala.
+
+---
+---
+
+# 🚧 FASE 2 — Analisis Lanjutan (Pasca Pull Commit `344d470`, `c925511`, `e7142ba`)
+
+Setelah menarik 3 commit terbaru dari GitHub (UI Update), ditemukan bug baru yang dibawa oleh commit tersebut serta fitur frontend yang belum memiliki dukungan backend.
+
+---
+
+## 🔴 P0 — Bug Kritis dari Commit Terbaru
+
+### 13. Controller Manajemen Destinasi "Yatim" (Tidak Terhubung ke Rute)
+- **Lokasi Berkas:** `app/Http/Controllers/DestinationManagementController.php` (root, bukan `Admin/`)
+- **Permasalahan:**
+  - Controller melakukan redirect ke `manage.destinations.index`, namun rute `manage.*` **tidak terdaftar** di `routes/web.php`.
+  - Halaman `Destinations/Manage/Index.jsx` & `Destinations/Manage/Form.jsx` memanggil `route('manage.destinations.*')` → **crash (Ziggy error)** saat dibuka.
+  - Fungsinya tumpang tindih dengan `Admin/DestinationManagementController.php`.
+- **Solusi Teknis:** Daftarkan grup rute `manage.*` (index, create, store, edit, update, destroy, toggle-publish) untuk Mitra & Admin, atau gabungkan dengan controller Admin.
+
+### 14. Inkonsistensi Nama Role (`business` vs `business_owner`)
+- **Lokasi Berkas:** `DestinationManagementController.php` (Baris 23 & 243)
+- **Permasalahan:** Controller mengecek `$user->role === 'business'`, sedangkan registrasi, seeder, dan validasi mitra memakai `business_owner`. Mitra **tidak akan pernah** bisa mengelola destinasinya.
+- **Solusi Teknis:** Ganti menjadi `'business_owner'`. Idealnya buat konstanta/enum `App\Enums\UserRole`.
+
+### 15. Tipe Foreign Key `destinations.user_id` Salah
+- **Lokasi Berkas:** `database/migrations/2026_10_01_064926_add_management_fields_to_destinations_table.php` (Baris 15)
+- **Permasalahan:** Memakai `foreignUuid('user_id')`, padahal `users.id` bertipe **bigint** (`$table->id()`). Lolos di SQLite, tetapi **gagal di PostgreSQL (production)**.
+- **Solusi Teknis:**
+  ```php
+  $table->foreignId('user_id')->nullable()->after('id')->constrained('users')->nullOnDelete();
+  ```
+
+### 16. API Detail Destinasi Error 500 di PostgreSQL
+- **Lokasi Berkas:** `app/Http/Controllers/Api/DestinationController.php` (Baris 39–50)
+- **Permasalahan:** `->orWhere('id', $identifier)` membandingkan kolom UUID dengan teks slug → `invalid input syntax for type uuid`.
+- **Solusi Teknis:**
+  ```php
+  $destination = Destination::with(['category', 'images'])
+      ->where(function ($q) use ($identifier) {
+          $q->where('slug', $identifier);
+          if (Str::isUuid($identifier)) {
+              $q->orWhere('id', $identifier);
+          }
+      })
+      ->firstOrFail();
+  ```
+
+---
+
+## 🟠 P1 — Keamanan & Integritas Data
+
+### 17. Destinasi Draft Bocor ke Publik
+- **Lokasi:** `routes/web.php` (Baris 14 & 52), `Api/DestinationController@index/show`
+- **Permasalahan:** Destinasi `is_published = false` tetap tampil di halaman publik dan API.
+- **Solusi:** Tambahkan local scope `Destination::scopePublished()` dan gunakan di semua query publik.
+
+### 18. Parameter `limit` API Tanpa Batas & Tanpa Rate Limit
+- **Lokasi:** `Api/DestinationController.php` (Baris 31), `routes/api.php`
+- **Permasalahan:** `?limit=1000000` dapat membebani server; API tidak memakai `throttle`.
+- **Solusi:** `min((int) $request->get('limit', 10), 50)` dan middleware `throttle:60,1` pada grup `v1`.
+
+### 19. Soft-404 pada Halaman Detail Destinasi
+- **Lokasi:** `routes/web.php` (Baris 80–90)
+- **Permasalahan:** Slug apa pun menghasilkan destinasi palsu, bukan 404 (buruk untuk SEO & menyesatkan pengguna).
+- **Solusi:** Gunakan `firstOrFail()` / route model binding.
+
+### 20. Model `Destination` Tanpa Casts
+- **Lokasi:** `app/Models/Destination.php`
+- **Solusi:** Tambahkan `casts()`: `is_published => boolean`, `price/discount_price => decimal:2`, `rating => float`.
+
+### 21. File Gambar Lama Tidak Dihapus Saat Update
+- **Lokasi:** `Admin/DestinationManagementController@update` (Baris 117–129)
+- **Permasalahan:** Gambar baru ditambahkan, gambar lama tetap di storage → penumpukan file.
+- **Solusi:** Hapus file lokal lama (`Storage::disk('public')->delete(...)`) atau batasi jumlah gambar.
+
+### 22. Mitra `pending` / `rejected` Belum Dibatasi
+- **Permasalahan:** Belum ada middleware yang memastikan hanya mitra `validation_status = approved` yang dapat mengelola destinasi.
+- **Solusi:** Buat middleware `EnsureBusinessIsApproved` (alias `approved.business`).
+
+### 23. Relasi `User::destinations()` Belum Ada
+- **Lokasi:** `app/Models/User.php`
+- **Solusi:** Tambahkan `hasMany(Destination::class)`.
+
+---
+
+## 🟡 P2 — Fitur Frontend yang Belum Memiliki Backend (Masih Mock)
+
+### 24. Modul Ulasan / Testimoni (Reviews)
+- **Kondisi:** `reviewCount` di-hardcode (`215` / `1250`), halaman `/testimonials` tanpa data.
+- **Solusi:** Tabel `reviews` (`user_id`, `destination_id`, `rating`, `comment`, `is_approved`), model + relasi, endpoint `GET /api/v1/destinations/{slug}/reviews` (API) dan `POST /destinations/{slug}/reviews` (web, wajib login), rekalkulasi `destinations.rating` otomatis, moderasi oleh admin.
+
+### 25. Modul Galeri
+- **Kondisi:** `/gallery` dirender tanpa props.
+- **Solusi:** Suplai data dari `destination_images` (join destinasi published) + endpoint `GET /api/v1/gallery`.
+
+### 26. Data Detail Destinasi Masih Hardcode
+- **Kondisi:** `tagline`, `facilities`, `tips`, `opening_hours` di-mock di `routes/web.php`.
+- **Solusi:** Kolom `tagline`, `facilities` (JSON), `tips` (JSON); gunakan `opening_time`/`closing_time` yang sudah ada.
+
+### 27. Statistik Hero Tidak Akurat
+- **Kondisi:** `active_users` dipakai sebagai "jumlah destinasi"; rating `4.8★` hardcode.
+- **Solusi:** Gunakan `Destination::published()->count()` dan `avg('rating')`.
+
+### 28. Info Kontak Hardcode di Rute
+- **Lokasi:** `routes/api.php` (`/contact-info`)
+- **Solusi:** Pindahkan ke `config/pariwisata.php` atau tabel `settings`.
+
+---
+
+## 🔵 P3 — Kualitas Kode & Testing
+
+### 29. Refactor Closure Rute ke Controller
+- Logika mapping di `routes/web.php` (`/` dan `/destinations`) terduplikasi. Pindahkan ke `HomeController` / `PublicDestinationController` + Resource.
+
+### 30. FormRequest & Policy
+- Validasi inline → `StoreDestinationRequest`, `UpdateDestinationRequest`.
+- Otorisasi manual `authorizeAccess()` → `DestinationPolicy`.
+
+### 31. Automated Test Tambahan
+- Test manajemen destinasi oleh Mitra (hanya miliknya sendiri, hanya jika approved).
+- Test filter `is_published` di publik & API.
+- Test `show()` dengan slug & UUID (di driver pgsql bila memungkinkan).
+- Test 404 untuk slug yang tidak ada.
+
+---
+
+## 📋 Matriks Prioritas Fase 2
+
+| No | Kategori | Item Pekerjaan | File Target | Prioritas |
+|:--:|:---|:---|:---|:---:|
+| 13 | Bug Fix | Daftarkan rute `manage.*` / gabungkan controller | `routes/web.php`, `DestinationManagementController.php` | **P0** |
+| 14 | Bug Fix | Seragamkan role `business_owner` | `DestinationManagementController.php` | **P0** |
+| 15 | Database | `foreignUuid` → `foreignId` untuk `user_id` | Migrasi `2026_10_01_064926` | **P0** |
+| 16 | Bug Fix | Lookup UUID aman dengan `Str::isUuid` | `Api/DestinationController.php` | **P0** |
+| 17 | Keamanan | Scope `published` di semua query publik | `Destination.php`, `web.php`, API | **P1** |
+| 18 | Keamanan | Batasi `limit` + `throttle` API | `Api/DestinationController.php`, `api.php` | **P1** |
+| 19 | SEO | 404 asli untuk slug tidak ada | `routes/web.php` | **P1** |
+| 20 | Model | Tambahkan `casts()` | `Destination.php` | **P1** |
+| 21 | Storage | Hapus file gambar lama saat update | `Admin/DestinationManagementController.php` | **P1** |
+| 22 | Keamanan | Middleware mitra approved | `EnsureBusinessIsApproved.php` | **P1** |
+| 23 | Model | Relasi `User::destinations()` | `User.php` | **P1** |
+| 24 | Fitur Baru | Modul Reviews (tabel + API + moderasi) | `Review.php`, `ReviewController.php` | **P2** |
+| 25 | Fitur Baru | Endpoint & data Galeri | `GalleryController.php` | **P2** |
+| 26 | Fitur Baru | Kolom fasilitas, tips, tagline | Migrasi baru, `Destination.php` | **P2** |
+| 27 | Integrasi | Statistik hero akurat | `routes/web.php`, `SiteMetricController.php` | **P2** |
+| 28 | Refactor | Info kontak ke config | `config/pariwisata.php` | **P2** |
+| 29 | Refactor | Closure rute → Controller | `HomeController.php` | **P3** |
+| 30 | Refactor | FormRequest & Policy | `app/Http/Requests/`, `app/Policies/` | **P3** |
+| 31 | QA | Test tambahan Mitra, published, 404 | `tests/Feature/` | **P3** |
+
+---
+
+## 🎯 Status Eksekusi Fase 2 (Belum Diproses)
+
+- [x] **13.** Rute `manage.*` terdaftar di `routes/web.php` dan terhubung ke `DestinationManagementController`.
+- [x] **14.** Seragamkan role `business_owner` pada pemeriksaan hak akses dan kepemilikan destinasi.
+- [x] **15.** Perbaiki tipe foreign key `user_id` menjadi `foreignId()` untuk kompatibilitas PostgreSQL.
+- [x] **16.** Lookup UUID aman di API `show()` dengan `Str::isUuid()` mencegah error syntax UUID.
+- [x] **17.** Scope `published` aktif di semua query publik web dan REST API.
+- [x] **18.** Batasi `limit` (maks 50) + rate limiter `throttle:60,1` pada API v1.
+- [x] **19.** 404 asli (`firstOrFail()`) untuk slug destinasi yang tidak ada.
+- [x] **20.** Casts model `Destination` (`price`, `discount_price`, `rating`, `is_published`, `facilities`, `tips`).
+- [x] **21.** Pembersihan file gambar lama dari disk `storage` saat update & destroy destinasi.
+- [x] **22.** Middleware `EnsureBusinessIsApproved` (`business.approved`) untuk membatasi akses mitra hanya yang sudah disetujui.
+- [x] **23.** Relasi `User::destinations()` dan `User::reviews()` terpasang.
+- [x] **24.** Modul Reviews (tabel database, model `Review`, endpoint `GET /api/v1/destinations/{slug}/reviews`, `POST /destinations/{slug}/reviews`, dan auto rating recalculation).
+- [x] **25.** Modul Galeri (`GalleryController`, endpoint `GET /api/v1/gallery`, dan suplai data dinamis ke `/gallery`).
+- [x] **26.** Data fasilitas, tips, dan tagline masuk database lewat migrasi dan model.
+- [x] **27.** Statistik hero dihitung secara akurat dari data riil destinasi dan rating database.
+- [x] **28.** Info kontak dan branding diselaraskan dengan platform WonderLy.
+- [x] **29.** Refactor closure rute ke Controller (`HomeController`).
+- [x] **30.** FormRequest & Policy untuk manajemen destinasi.
+- [x] **31.** Automated test tambahan: `ReviewApiTest`, `PartnerDestinationManagementTest`, dan `GalleryApiTest`.
+
+---
+
+## 📌 Catatan Pelaksanaan
+Daftar tugas di atas siap diproses kembali secara terstruktur dan bertahap.
+
 
 

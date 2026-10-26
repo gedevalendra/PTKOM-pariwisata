@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Destination;
 use App\Models\SiteMetric;
 
 class SiteMetricController extends Controller
@@ -38,6 +39,8 @@ class SiteMetricController extends Controller
                 'active_partners_formatted' => $metrics->active_users.'+',
                 'active_partners' => $metrics->active_users,
                 'awards_total' => $metrics->total_bookings,
+                'destinations_total' => Destination::published()->count(),
+                'average_rating' => round((float) Destination::published()->where('rating', '>', 0)->avg('rating'), 1),
             ],
         ]);
     }

@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Category;
 use App\Models\Destination;
 use Database\Seeders\DestinationSeeder;
 
@@ -18,8 +17,8 @@ test('api returns destination list successfully', function () {
         ])
         ->assertJsonStructure([
             'data' => [
-                '*' => ['id', 'name', 'slug', 'category', 'price', 'rating']
-            ]
+                '*' => ['id', 'name', 'slug', 'category', 'price', 'rating'],
+            ],
         ]);
 });
 
@@ -46,7 +45,7 @@ test('api returns destination detail by slug', function () {
             'data' => [
                 'slug' => 'pulau-pahawang',
                 'name' => 'Pulau Pahawang',
-            ]
+            ],
         ]);
 });
 
@@ -61,7 +60,7 @@ test('api returns destination detail by uuid', function () {
             'data' => [
                 'id' => $dest->id,
                 'slug' => $dest->slug,
-            ]
+            ],
         ]);
 });
 
@@ -85,7 +84,21 @@ test('api returns category list successfully', function () {
         ])
         ->assertJsonStructure([
             'data' => [
-                '*' => ['id', 'name', 'slug']
-            ]
+                '*' => ['id', 'name', 'slug'],
+            ],
         ]);
+});
+
+test('api hides unpublished destinations', function () {
+    $dest = Destination::first();
+    $dest->update(['is_published' => false]);
+
+    $this->getJson('/api/v1/destinations')->assertJsonMissing(['slug' => $dest->slug]);
+    $this->getJson("/api/v1/destinations/{$dest->slug}")->assertStatus(404);
+});
+
+test('api caps the limit parameter at 50', function () {
+    $this->getJson('/api/v1/destinations?limit=1000000')
+        ->assertOk()
+        ->assertJsonPath('meta.per_page', 50);
 });

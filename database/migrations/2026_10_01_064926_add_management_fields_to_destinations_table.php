@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('destinations', function (Blueprint $table) {
-            $table->foreignUuid('user_id')->nullable()->after('id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->after('id')->constrained('users')->cascadeOnDelete();
             $table->time('opening_time')->nullable()->after('location');
             $table->time('closing_time')->nullable()->after('opening_time');
             $table->decimal('discount_price', 15, 2)->nullable()->after('price');

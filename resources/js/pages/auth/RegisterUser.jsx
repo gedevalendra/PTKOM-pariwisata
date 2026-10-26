@@ -65,24 +65,6 @@ export default function RegisterUser({ token }) {
     const submit = (e) => {
         e.preventDefault();
 
-        // Save account into localStorage for local testing & persistence
-        try {
-            const existingAccounts = JSON.parse(localStorage.getItem('wonderly_local_accounts') || '[]');
-            const newAccount = {
-                name: data.name,
-                email: data.email,
-                password: data.password,
-                role: token ? 'pemilik_usaha' : 'wisatawan',
-                created_at: new Date().toISOString()
-            };
-            
-            // Avoid duplicates
-            const filtered = existingAccounts.filter(acc => acc.email !== data.email);
-            localStorage.setItem('wonderly_local_accounts', JSON.stringify([newAccount, ...filtered]));
-        } catch (err) {
-            console.error('Failed to save to localStorage:', err);
-        }
-
         post(route('registrasi.store'), {
             onFinish: () => reset('password', 'password_confirmation'),
         });

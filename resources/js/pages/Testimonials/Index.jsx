@@ -72,7 +72,8 @@ const testimonialsData = [
     },
 ];
 
-export default function TestimonialsIndex() {
+export default function TestimonialsIndex({ testimonials = [] }) {
+    const items = testimonials.length > 0 ? testimonials : testimonialsData;
     const [filterRating, setFilterRating] = useState('all');
 
     return (
@@ -123,7 +124,7 @@ export default function TestimonialsIndex() {
             <section className="py-16 sm:py-24">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {testimonialsData.map((item) => (
+                        {items.map((item) => (
                             <div
                                 key={item.id}
                                 className="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-sm border border-slate-200/80 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group"

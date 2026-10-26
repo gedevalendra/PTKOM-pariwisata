@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreDestinationRequest;
+use App\Http\Requests\UpdateDestinationRequest;
 use App\Models\Category;
 use App\Models\Destination;
 use App\Models\DestinationImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -17,10 +20,11 @@ class DestinationManagementController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        Gate::authorize('viewAny', Destination::class);
 
         $query = Destination::with(['category', 'images']);
 
-        if ($user->role === 'business') {
+        if ($user->role === 'business_owner') {
             $query->where('user_id', $user->id);
         }
 
@@ -51,8 +55,10 @@ class DestinationManagementController extends Controller
     /**
      * Show the form for creating a new destination.
      */
-    public function create()
+    public function create(Request $request)
     {
+        Gate::authorize('create', Destination::class);
+
         $categories = Category::all(['id', 'name', 'slug']);
 
         return Inertia::render('Destinations/Manage/Form', [
@@ -64,28 +70,15 @@ class DestinationManagementController extends Controller
     /**
      * Store a newly created destination in storage.
      */
-    public function store(Request $request)
+    public function store(StoreDestinationRequest $request)
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'content' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'discount_price' => 'nullable|numeric|min:0|lt:price',
-            'location' => 'nullable|string|max:255',
-            'opening_time' => 'nullable|string',
-            'closing_time' => 'nullable|string',
-            'is_published' => 'boolean',
-            'image_url' => 'nullable|string|url',
-            'image' => 'nullable|image|max:3072',
-        ]);
+        $validated = $request->validated();
 
         $slug = Str::slug($validated['name']);
         $originalSlug = $slug;
         $counter = 1;
         while (Destination::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -96,6 +89,9 @@ class DestinationManagementController extends Controller
             'slug' => $slug,
             'description' => $validated['description'] ?? null,
             'content' => $validated['content'] ?? null,
+            'tagline' => $validated['tagline'] ?? null,
+            'facilities' => $validated['facilities'] ?? null,
+            'tips' => $validated['tips'] ?? null,
             'price' => $validated['price'],
             'discount_price' => $validated['discount_price'] ?? null,
             'location' => $validated['location'] ?? null,
@@ -109,8 +105,8 @@ class DestinationManagementController extends Controller
         $finalImageUrl = null;
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('destinations', 'public');
-            $finalImageUrl = '/storage/' . $path;
-        } elseif (!empty($validated['image_url'])) {
+            $finalImageUrl = '/storage/'.$path;
+        } elseif (! empty($validated['image_url'])) {
             $finalImageUrl = $validated['image_url'];
         }
 
@@ -130,7 +126,7 @@ class DestinationManagementController extends Controller
      */
     public function edit(Request $request, Destination $destination)
     {
-        $this->authorizeAccess($request->user(), $destination);
+        Gate::authorize('update', $destination);
 
         $destination->load(['category', 'images']);
         $categories = Category::all(['id', 'name', 'slug']);
@@ -144,31 +140,16 @@ class DestinationManagementController extends Controller
     /**
      * Update the specified destination in storage.
      */
-    public function update(Request $request, Destination $destination)
+    public function update(UpdateDestinationRequest $request, Destination $destination)
     {
-        $this->authorizeAccess($request->user(), $destination);
-
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'content' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'discount_price' => 'nullable|numeric|min:0|lt:price',
-            'location' => 'nullable|string|max:255',
-            'opening_time' => 'nullable|string',
-            'closing_time' => 'nullable|string',
-            'is_published' => 'boolean',
-            'image_url' => 'nullable|string|url',
-            'image' => 'nullable|image|max:3072',
-        ]);
+        $validated = $request->validated();
 
         if ($destination->name !== $validated['name']) {
             $slug = Str::slug($validated['name']);
             $originalSlug = $slug;
             $counter = 1;
             while (Destination::where('slug', $slug)->where('id', '!=', $destination->id)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
+                $slug = $originalSlug.'-'.$counter;
                 $counter++;
             }
             $destination->slug = $slug;
@@ -179,6 +160,9 @@ class DestinationManagementController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'content' => $validated['content'] ?? null,
+            'tagline' => $validated['tagline'] ?? null,
+            'facilities' => $validated['facilities'] ?? null,
+            'tips' => $validated['tips'] ?? null,
             'price' => $validated['price'],
             'discount_price' => $validated['discount_price'] ?? null,
             'location' => $validated['location'] ?? null,
@@ -191,13 +175,16 @@ class DestinationManagementController extends Controller
         $finalImageUrl = null;
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('destinations', 'public');
-            $finalImageUrl = '/storage/' . $path;
-        } elseif (!empty($validated['image_url'])) {
+            $finalImageUrl = '/storage/'.$path;
+        } elseif (! empty($validated['image_url'])) {
             $finalImageUrl = $validated['image_url'];
         }
 
         if ($finalImageUrl) {
-            $destination->images()->update(['is_primary' => false]);
+            $destination->images()->where('is_primary', true)->get()->each(function (DestinationImage $image) {
+                $image->deleteStoredFile();
+                $image->delete();
+            });
             DestinationImage::create([
                 'destination_id' => $destination->id,
                 'image_url' => $finalImageUrl,
@@ -213,7 +200,7 @@ class DestinationManagementController extends Controller
      */
     public function destroy(Request $request, Destination $destination)
     {
-        $this->authorizeAccess($request->user(), $destination);
+        Gate::authorize('delete', $destination);
 
         $destination->delete();
 
@@ -225,25 +212,12 @@ class DestinationManagementController extends Controller
      */
     public function togglePublish(Request $request, Destination $destination)
     {
-        $this->authorizeAccess($request->user(), $destination);
+        Gate::authorize('update', $destination);
 
         $destination->update([
-            'is_published' => !$destination->is_published,
+            'is_published' => ! $destination->is_published,
         ]);
 
         return back()->with('success', 'Status publikasi destinasi berhasil diubah!');
-    }
-
-    protected function authorizeAccess($user, Destination $destination): void
-    {
-        if ($user->role === 'admin') {
-            return;
-        }
-
-        if ($user->role === 'business' && $destination->user_id === $user->id) {
-            return;
-        }
-
-        abort(403, 'Anda tidak memiliki hak akses untuk destinasi ini.');
     }
 }

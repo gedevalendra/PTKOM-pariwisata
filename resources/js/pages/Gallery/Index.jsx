@@ -113,13 +113,14 @@ const galleryItemsData = [
     },
 ];
 
-export default function GalleryIndex() {
+export default function GalleryIndex({ galleryItems = [] }) {
+    const items = galleryItems.length > 0 ? galleryItems : galleryItemsData;
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [activeLightbox, setActiveLightbox] = useState(null);
 
     const filteredItems = selectedCategory === 'all'
-        ? galleryItemsData
-        : galleryItemsData.filter(item => item.category === selectedCategory);
+        ? items
+        : items.filter(item => item.category === selectedCategory);
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
@@ -213,10 +214,10 @@ export default function GalleryIndex() {
                                                 <i className="bx bx-camera text-slate-400"></i>
                                                 {item.photographer}
                                             </span>
-                                            <span className="flex items-center gap-1 text-pink-400 font-medium">
+                                            {item.likes !== undefined && <span className="flex items-center gap-1 text-pink-400 font-medium">
                                                 <i className="bx bxs-heart"></i>
                                                 {item.likes}
-                                            </span>
+                                            </span>}
                                         </div>
                                     </div>
                                 </div>

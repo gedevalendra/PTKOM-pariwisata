@@ -28,7 +28,7 @@ class DestinationManagementController extends Controller
             $operator = config('database.default') === 'pgsql' ? 'ilike' : 'like';
             $query->where(function ($q) use ($search, $operator) {
                 $q->where('name', $operator, "%{$search}%")
-                  ->orWhere('location', $operator, "%{$search}%");
+                    ->orWhere('location', $operator, "%{$search}%");
             });
         }
 
@@ -63,7 +63,7 @@ class DestinationManagementController extends Controller
         $slug = $baseSlug;
         $count = 1;
         while (Destination::where('slug', $slug)->exists()) {
-            $slug = "{$baseSlug}-" . (++$count);
+            $slug = "{$baseSlug}-".(++$count);
         }
 
         $destination = Destination::create([
@@ -118,8 +118,11 @@ class DestinationManagementController extends Controller
             $path = $request->file('image')->store('destinations', 'public');
             $imageUrl = Storage::url($path);
 
-            // Unset previous primary images
-            DestinationImage::where('destination_id', $destination->id)->update(['is_primary' => false]);
+            // Replace previous primary images, removing their stored files
+            $destination->images()->where('is_primary', true)->get()->each(function (DestinationImage $image) {
+                $image->deleteStoredFile();
+                $image->delete();
+            });
 
             DestinationImage::create([
                 'destination_id' => $destination->id,
@@ -136,14 +139,6 @@ class DestinationManagementController extends Controller
      */
     public function destroy(Destination $destination): RedirectResponse
     {
-        // Delete image files from storage if stored locally
-        foreach ($destination->images as $img) {
-            if (Str::startsWith($img->image_url, '/storage/')) {
-                $filePath = Str::replaceFirst('/storage/', '', $img->image_url);
-                Storage::disk('public')->delete($filePath);
-            }
-        }
-
         $destination->delete();
 
         return back()->with('success', 'Destinasi wisata berhasil dihapus.');
