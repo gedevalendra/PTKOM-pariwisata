@@ -139,6 +139,7 @@ export default function GalleryIndex({ galleryItems = [] }) {
                         Potret Keajaiban <span className="font-serif italic font-normal text-blue-400">Sang Bumi Ruwa Jurai</span>
                     </h1>
 
+
                     <p className="mt-6 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
                         Jelajahi momen-momen spektakuler alam, kebudayaan, dan keindahan pesisir Lampung melalui lensa para fotografer berbakat.
                     </p>
