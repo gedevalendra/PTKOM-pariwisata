@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Notifications\PartnerValidationNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -55,7 +56,7 @@ class BusinessValidationController extends Controller
         ]);
 
         if (in_array($request->status, ['approved', 'rejected'])) {
-            $user->notify(new \App\Notifications\PartnerValidationNotification($request->status, $request->rejection_reason));
+            $user->notify(new PartnerValidationNotification($request->status, $request->rejection_reason));
         }
 
         return back()->with('success', 'Status validasi pemilik usaha berhasil diperbarui.');

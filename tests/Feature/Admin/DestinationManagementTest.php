@@ -39,7 +39,7 @@ test('admin can create a new destination with image upload', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $category = Category::first();
 
-    $file = UploadedFile::fake()->image('pantai-marina.jpg');
+    $file = UploadedFile::fake()->create('pantai-marina.jpg', 100, 'image/jpeg');
 
     $response = $this->actingAs($admin)->post('/admin/destinasi', [
         'name' => 'Pantai Marina Kalianda',
@@ -80,7 +80,7 @@ test('admin can update destination details', function () {
     $response->assertSessionHas('success');
 
     expect($destination->fresh()->name)->toBe('Nama Destinasi Diperbarui');
-    expect((int)$destination->fresh()->price)->toBe(75000);
+    expect((int) $destination->fresh()->price)->toBe(75000);
 });
 
 test('admin can delete a destination', function () {

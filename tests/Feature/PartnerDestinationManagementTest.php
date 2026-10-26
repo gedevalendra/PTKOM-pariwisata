@@ -84,7 +84,7 @@ test('replacing the image removes the old stored file', function () {
 
     $admin = User::factory()->create(['role' => 'admin']);
     $destination = Destination::first();
-    $oldPath = UploadedFile::fake()->image('old.jpg')->store('destinations', 'public');
+    $oldPath = UploadedFile::fake()->create('old.jpg', 100, 'image/jpeg')->store('destinations', 'public');
     $destination->images()->delete();
     $destination->images()->create(['image_url' => '/storage/'.$oldPath, 'is_primary' => true]);
 
@@ -92,7 +92,7 @@ test('replacing the image removes the old stored file', function () {
         'name' => $destination->name,
         'category_id' => $destination->category_id,
         'price' => 1000,
-        'image' => UploadedFile::fake()->image('new.jpg'),
+        'image' => UploadedFile::fake()->create('new.jpg', 100, 'image/jpeg'),
     ]);
 
     Storage::disk('public')->assertMissing($oldPath);
@@ -104,7 +104,7 @@ test('deleting a destination removes its stored image files', function () {
 
     $admin = User::factory()->create(['role' => 'admin']);
     $destination = Destination::first();
-    $path = UploadedFile::fake()->image('a.jpg')->store('destinations', 'public');
+    $path = UploadedFile::fake()->create('a.jpg', 100, 'image/jpeg')->store('destinations', 'public');
     $destination->images()->create(['image_url' => '/storage/'.$path, 'is_primary' => true]);
 
     $this->actingAs($admin)->delete(route('manage.destinations.destroy', $destination));
